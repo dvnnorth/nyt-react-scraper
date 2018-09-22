@@ -1,21 +1,10 @@
-import React, { Component, Fragment } from 'react';
-import API from '../../utils/API';
-import { Link } from 'react-router-dom';
+import React from 'react';
 import './NoMatch.css';
 
-class App extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            articles: []
-        };
-    }
+const NoMatch = props => (
+    <p>
+        404 Not Found...
+    </p>
+);
 
-    render() {
-        return (
-            <p>404 Not Found</p>
-        );
-    }
-}
-
-export default App;
+export default NoMatch;

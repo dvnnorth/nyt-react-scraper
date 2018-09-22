@@ -1,9 +1,9 @@
 import Home from './Home/Home';
-import Articles from './Articles/Articles';
+import SavedArticles from './SavedArticles/SavedArticles';
 import NoMatch from './NoMatch/NoMatch';
 
 export {
     Home,
-    Articles,
+    SavedArticles,
     NoMatch
 };
