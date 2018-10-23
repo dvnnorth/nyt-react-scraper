@@ -9,7 +9,13 @@ const NotesSchema = new Schema({
   // `title` is of type String
   title: String,
   // `body` is of type String
-  body: String
+  body: String,
+  // reference to a user. Should match the article storing the reference to this note.
+  // ensures that the user never sees a note that they have not saved themselves.
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'Users'
+  }
 });
 
 // This creates our model from the above schema, using mongoose's model method

@@ -1,5 +1,3 @@
-const cheerio = require('cheerio');
-const request = require('request-promise');
 const db = require('../models');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
@@ -23,17 +21,16 @@ module.exports = (app, log) => {
   //local strategy used for signing in users
   passport.use(
     new LocalStrategy((username, password, done) => {
-      // Retrieve a User object from the database using Sequelize 
+      // Retrieve a User object from the database using mongoose 
       // by username
       //where: { username: username } 
-      db.Users.findOne({ where: { username: username } })
+      db.Users.findOne({ username: username })
         .then((res) => {
-          //console.log(res);
-          // res is the response from Sequelize in the promise
+          // res is the response from mongoose in the promise
           // If there's no response, give error message
           if (!res) return done(null, false, { message: 'Incorrect username' });
           // Content (User object) is in res.dataValues
-          let user = res.dataValues;
+          let user = res;
           // Password in the user.password field is already hashed. Store in variable hash
           let hash = user.password;
           // Compare the password (using the hash in session)
@@ -49,7 +46,8 @@ module.exports = (app, log) => {
               return done(null, false, { message: 'Incorrect password' });
             }
           });
-        });
+        })
+        .catch(err => sendError(err, res));
     })
   );
 
@@ -57,9 +55,9 @@ module.exports = (app, log) => {
   passport.serializeUser((user, done) => done(null, user.username));
 
   passport.deserializeUser((username, done) => {
-    db.Users.findOne({ where: { username: username } })
-      .then(res => {
-        done(null, res.dataValues);
+    db.Users.findOne({ username: username } )
+      .then(user => {
+        done(null, user);
       })
       .catch(err => {
         done(err, null);
@@ -83,9 +81,6 @@ module.exports = (app, log) => {
   // Add / update note info
   app.post('/api/articles/notes/:id', authenticationMiddleware(), controller.addUpdateNote);
 
-  // Modal builder
-  app.post('/api/modal', authenticationMiddleware(), controller.modalBuilder); 
-
   // Front end log route
   app.post('/api/log', authenticationMiddleware(), controller.logger);
 
@@ -93,14 +88,14 @@ module.exports = (app, log) => {
   app.put('/api/save/:id', authenticationMiddleware(), controller.articleSave);
 
   // Unsave an article
-  app.delete('/api/save/:id', authenticationMiddleware(), controller.deleteArticle);
+  app.delete('/api/save/:id', authenticationMiddleware(), controller.unsaveArticle);
 
   // Delete all articles
   app.delete('/api/clear', authenticationMiddleware(), controller.deleteAllArticles);
 };
 
-// errorSend is a simple error handling function to DRY up code
-let errorSend = (err, res) => {
+// sendError is a simple error handling function to DRY up code
+let sendError = (err, res) => {
   if (err) {
     res.statusCode = 500;
     res.send(err);

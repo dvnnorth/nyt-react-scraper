@@ -1,5 +1,7 @@
 const db = require('../models/index');
 const bcrypt = require('bcrypt');
+const cheerio = require('cheerio');
+const request = require('request-promise');
 
 const sendError = (err, res) => {
   if (err) {
@@ -45,16 +47,12 @@ module.exports = {
       .catch(err => sendError(err, res));
   },
 
-
   login: (req, res) => {
-    console.log(req.body);
     if (req.isAuthenticated) {
-      console.log(req.body.username);
-      db.Users.findOne({ where: { username: req.body.username } })
-        .then(data => {
-          //console.log(req.body.username);
+      db.Users.findOne({ username: req.body.username })
+        .then(user => {
           res.statusCode = 200;
-          res.send(data.dataValues.username);
+          res.send(user.username);
         })
         .catch(err => sendError(err, res));
     }
@@ -90,14 +88,13 @@ module.exports = {
 
     // Clear the unsaved articles
     db.Articles.deleteMany({
-      saved: false
+      saved: false,
+      user: req.user._id
     })
       .then(() => {
         // Get the html from nytimes
         request.get('https://www.nytimes.com')
-
           .then(html => {
-
             // Load $ cheerio handler
             const $ = cheerio.load(html);
 
@@ -129,6 +126,7 @@ module.exports = {
                   .attr('href')}`;
                 // Store a null note for now
                 result.note = null;
+                result.user = req.user._id;
               }
 
               // Only push the article to results if the required
@@ -150,17 +148,18 @@ module.exports = {
                     res.statusCode = 200;
                     res.send(articles);
                   })
-                  .catch(err => errorSend(err, res)); // Send error if caught
+                  .catch(err => sendError(err, res)); // Send error if caught
               })
-              .catch(err => errorSend(err, res)); // Send error if caught
+              .catch(err => sendError(err, res)); // Send error if caught
           });
       })
-      .catch(err => errorSend(err, res));
+      .catch(err => sendError(err, res));
   },
 
   articlesWithNote: (req, res) => {
     db.Articles.findOne({
-      _id: req.params.id
+      _id: req.params.id,
+      user: req.user._id
     })
       // ..and populate all of the notes associated with it
       .populate('note')
@@ -173,15 +172,17 @@ module.exports = {
           res.sendStatus(404);
         }
       })
-      .catch(err => errorSend(err, res));
+      .catch(err => sendError(err, res));
   },
 
   addUpdateNote: (req, res) => {
     // Create a new note and pass the req.body to the entry
+    req.body.user = req.user._id; // Make sure note has current user ID in session as its "user" property
     db.Notes.create(req.body)
       .then(note => {
         db.Articles.findOne({
-          _id: req.params.id
+          _id: req.params.id,
+          user: req.user._id
         } /*, { note: note._id }, { new: true }*/)
           .then(article => {
             if (article) {
@@ -195,13 +196,7 @@ module.exports = {
             }
           });
       })
-      .catch(err => errorSend(err, res));
-  },
-
-  modalBuilder: (req, res) => {
-    res.render('modal', {
-      content: req.body
-    });
+      .catch(err => sendError(err, res));
   },
 
   logger: (req, res) => {
@@ -210,7 +205,10 @@ module.exports = {
   },
 
   articleSave: (req, res) => {
-    db.Articles.findById(req.params.id)
+    db.Articles.findById({
+      _id: req.params.id,
+      user: req.user._id
+    })
       .then(article => {
         article.saved = true;
         article.save(() => {
@@ -218,12 +216,13 @@ module.exports = {
           res.send(article);
         });
       })
-      .catch(err => errorSend(err, res));
+      .catch(err => sendError(err, res));
   },
 
-  deleteArticle: (req, res) => {
+  unsaveArticle: (req, res) => {
     db.Articles.findOne({
-      _id: req.params.id
+      _id: req.params.id,
+      user: req.user._id
     })
       .then((article) => {
         article.saved = false;
@@ -231,15 +230,23 @@ module.exports = {
           res.sendStatus(200);
         });
       })
-      .catch(err => errorSend(err, res));
+      .catch(err => sendError(err, res));
   },
 
   deleteAllArticles: (req, res) => {
-    db.Articles.deleteMany({})
+    db.Articles.deleteMany({
+      user: req.user._id
+    })
       .then(() => {
-        res.sendStatus(200);
+        db.Notes.deleteMany({
+          user: req.user._id
+        })
+          .then(() => {
+            res.sendStatus(200);
+          })
+          .catch(err => sendError(err, res));
       })
-      .catch(err => errorSend(err, res));
+      .catch(err => sendError(err, res));
   }
 
 };

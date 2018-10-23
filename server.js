@@ -26,8 +26,8 @@ app.use(
   session({
     secret: 'AFineMistSettlesOnTheGrassyPlain', //this should be a random string
     resave: false,
-    saveUninitialized: false,
-    cookie: { secure: true }
+    saveUninitialized: false
+    // cookie: { secure: true }
   })
 );
 app.use(passport.initialize());

@@ -33,6 +33,12 @@ const ArticlesSchema = new Schema({
   note: {
     type: Schema.Types.ObjectId,
     ref: 'Notes'
+  },
+  // 'user' refers to the user that has stored the article
+  // ensures that user's saved articles are only saved and displayed for that user
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'Users'
   }
 });
 
