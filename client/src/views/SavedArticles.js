@@ -1,20 +1,58 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
 import API from '../utils/API';
-import { Link } from 'react-router-dom';
+import {
+  Container
+} from 'reactstrap';
+import { SiteModal, PageTitle } from '../components';
 
-class Articles extends Component {
+class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      articles: []
+      articles: [],
+      modal: false
     };
   }
 
+  scrapeArticles() {
+    API.scrapeArticles()
+      .then(articles => {
+        this.setState({ articles });
+      })
+      .catch(err => console.log(err));
+  }
+
+  handleScrapeArticles(event) {
+    event.preventDefault();
+    this.scrapeArticles();
+  }
+
+  showModal(type) {
+    switch (type) {
+    case 'scrape':
+      this.setState({});
+      return;
+      break;
+    case 'clear':
+      //
+      break;
+    }
+    return <SiteModal />;
+  }
+
   render() {
+
+    if (!this.props.authenticated) {
+      return <Redirect to="/" />;
+    }
     return (
-      <p>This is Articles.</p>
+      <Container>
+        <PageTitle pageTitle="Saved Articles" />
+        <SiteModal isOpen={this.state.modal} title="Hello" body="This is the body" buttonActionText="Do Thing" />
+      </Container>
     );
   }
 }
 
-export default Articles;
+export default Home;

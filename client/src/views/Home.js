@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
 import API from '../utils/API';
 import {
-  Container,
-  Jumbotron
+  Container
 } from 'reactstrap';
-import { SiteModal, PageTitle, TopNav, ArticleCard } from '../components';
+import { SiteModal, PageTitle } from '../components';
 
 class Home extends Component {
   constructor(props) {
@@ -32,7 +32,7 @@ class Home extends Component {
     switch (type) {
     case 'scrape':
       this.setState({});
-      return; 
+      return;
       break;
     case 'clear':
       //
@@ -42,18 +42,13 @@ class Home extends Component {
   }
 
   render() {
+
+    if (!this.props.authenticated) {
+      return <Redirect to="/" />;
+    }
     return (
       <Container>
-        <TopNav />
-        <Jumbotron className="p-3 p-md-5 text-white rounded bg-dark splash">
-          <div className="col-md-6 px-0">
-            <h1 className="display-4 font-italic">React News Scraper</h1>
-            <p className="lead my-3">A New York Times news scraper using the MERN stack</p>
-          </div>
-        </Jumbotron>
-        <main className="row mb-2">
-          <PageTitle pageTitle="Home" />
-        </main>
+        <PageTitle pageTitle="Home" />
         <SiteModal isOpen={this.state.modal} title="Hello" body="This is the body" buttonActionText="Do Thing" />
       </Container>
     );
