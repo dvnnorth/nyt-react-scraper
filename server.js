@@ -4,6 +4,10 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const path = require('path');
 
+//require authentication packages
+const passport = require('passport');
+const session = require('express-session');
+
 // Init Express app
 const app = express();
 
@@ -16,6 +20,18 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+//this should be below the static file middleware
+app.use(
+  session({
+    secret: 'AFineMistSettlesOnTheGrassyPlain', //this should be a random string
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: true }
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Call routes
 apiRoutes(app);
