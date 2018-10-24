@@ -5,7 +5,6 @@ const request = require('request-promise');
 
 const sendError = (err, res) => {
   if (err) {
-    console.log('sending error');
     res.statusCode = 500;
     res.send(err);
   }
@@ -34,15 +33,6 @@ module.exports = {
           res.statusCode = 200;
           res.send(user._id);
         });
-      })
-      .catch(err => sendError(err, res));
-  },
-
-  success: (req, res) => {
-    db.Users.findOne({ where: { username: req.params.username } })
-      .then(response => {
-        res.statusCode = 200;
-        res.send(response);
       })
       .catch(err => sendError(err, res));
   },

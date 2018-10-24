@@ -12,10 +12,10 @@ const TopNav = props => (
         <NavLink tag={Link} to="/articles">Articles</NavLink>
       </NavItem>
       <NavItem>
-        <NavLink href="#" onClick={props.scrape}>Scrape</NavLink>
+        <NavLink href="#" onClick={props.handleScrape}>Scrape</NavLink>
       </NavItem>
       <NavItem>
-        <NavLink href="#" className="text-danger" onClick={props.clear}>Clear</NavLink>
+        <NavLink href="#" className="text-danger" onClick={props.handleClear}>Clear</NavLink>
       </NavItem>
     </Nav>
   </div>

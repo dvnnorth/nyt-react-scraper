@@ -1,5 +1,11 @@
 import axios from 'axios';
 
 export default {
-  scrapeArticles: () => axios.get('/api/scrape')
+  
+  ///// Auth //////
+  login: loginInfo => axios.post('/api/login', loginInfo),
+
+  scrapeArticles: () => axios.get('/api/scrape'),
+
+  clearArticles: () => axios.delete('/api/clear'),
 };

@@ -1,9 +1,9 @@
 import React from 'react';
 
 const PageTitle = props => (
-  <div class="col-12 mb-4" >
+  <div className="col-12 mb-4" >
     <hr />
-    <h1 class="text-center">{props.pageTitle}</h1>
+    <h1 className="text-center">{props.pageTitle}</h1>
     <hr />
   </div>
 );

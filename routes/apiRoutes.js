@@ -7,10 +7,11 @@ const controller = require('../controller/controller.js');
 // Create the authenticationMiddleware function to validate requests
 const authenticationMiddleware = () => {
   return (req, res, next) => {
-    if (req.isAuthenticated()) return next();
+    if (req.isAuthenticated()) {
+      return next();
+    }
     else {
-      res.statusCode = 401;
-      res.redirect('/');
+      res.sendStatus(401);
     }
   };
 };
@@ -38,8 +39,6 @@ module.exports = (app, log) => {
             // res is the results of the comparison (true or false)
             if (err) return done(err);
             if (res) {
-              //console.log(user);
-              usernamed = user.username;
               return done(null, user);
             }
             else {
@@ -55,7 +54,7 @@ module.exports = (app, log) => {
   passport.serializeUser((user, done) => done(null, user.username));
 
   passport.deserializeUser((username, done) => {
-    db.Users.findOne({ username: username } )
+    db.Users.findOne({ username: username })
       .then(user => {
         done(null, user);
       })
