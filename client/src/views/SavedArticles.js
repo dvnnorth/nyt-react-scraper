@@ -1,58 +1,47 @@
-import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
-import API from '../utils/API';
-import {
-  Container
-} from 'reactstrap';
-import { SiteModal, PageTitle } from '../components';
+import React from 'react';
+import { Redirect, Link } from 'react-router-dom';
+import { Col, Row, Container } from 'reactstrap';
+import { PageTitle, ArticleCard } from '../components';
 
-class Home extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      articles: [],
-      modal: false
-    };
+const SavedArticles = props => {
+  if (!props.authenticated) {
+    return <Redirect to="/" />;
   }
+  return (
+    <Container>
+      <PageTitle pageTitle="Saved Articles" />
+      <Row>
+        {props.articles.length === 0 ?
+          (<Container>
+            <Row>
+              <Col xs="3" />
+              <Col xs="6">
+                <h3 className="text-center font-italic">No Saved Articles!</h3>
+                <br />
+                <div>
+                  <p className="text-center">
+                    Go to your <Link to="/home" className="btn-link">home page</Link> to save some articles.
+                  </p>
+                </div>
+              </Col>
+              <Col xs="3" />
+            </Row>
+          </Container>) :
+          props.articles.map((article, i) => (
+            <ArticleCard
+              key={i}
+              _id={article._id}
+              title={article.title}
+              section={article.section}
+              link={article.link}
+              note={article.note}
+              saved={article.saved}
+            />
+          ))}
+      </Row>
+    </Container>
+  );
+};
 
-  scrapeArticles() {
-    API.scrapeArticles()
-      .then(articles => {
-        this.setState({ articles });
-      })
-      .catch(err => console.log(err));
-  }
 
-  handleScrapeArticles(event) {
-    event.preventDefault();
-    this.scrapeArticles();
-  }
-
-  showModal(type) {
-    switch (type) {
-    case 'scrape':
-      this.setState({});
-      return;
-      break;
-    case 'clear':
-      //
-      break;
-    }
-    return <SiteModal />;
-  }
-
-  render() {
-
-    if (!this.props.authenticated) {
-      return <Redirect to="/" />;
-    }
-    return (
-      <Container>
-        <PageTitle pageTitle="Saved Articles" />
-        <SiteModal isOpen={this.state.modal} title="Hello" body="This is the body" buttonActionText="Do Thing" />
-      </Container>
-    );
-  }
-}
-
-export default Home;
+export default SavedArticles;

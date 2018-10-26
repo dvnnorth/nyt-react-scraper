@@ -1,6 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Col, Card, CardBody } from 'reactstrap';
+import { Col, Card, CardBody, Button } from 'reactstrap';
 
 const ArticleCard = props => (
   <Col md="6" className="mb-4">
@@ -12,27 +11,32 @@ const ArticleCard = props => (
         </h3>
         <div>
           {props.note ?
-            <Link
+            <Button
+              color="primary" 
               className="btn btn-outline-primary mt-3 mb-3 note"
               onClick={props.viewEditNote}
               data-id={props._id}>
               View / Edit Note
-            </Link> :
-            <Link
+            </Button> :
+            <Button
+              color="secondary"
               className="btn btn-outline-secondary mt-3 mb-3 note"
               onClick={props.createNote}
               data-id={props._id}>
               Create Note
-          </Link>}
+            </Button>}
           {props.saved ||
-            <Link
+            <Button
+              color="success"
               className="btn btn-outline-success mt-3 mb-3 save"
               onClick={props.saveArticle}
               data-id={props._id}>
               Save Article
-            </Link>}
+            </Button>}
         </div>
       </CardBody>
     </Card>
   </Col>
 );
+
+export default ArticleCard;

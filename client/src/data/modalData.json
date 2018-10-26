@@ -1,0 +1,12 @@
+{
+  "scrapeModalData": {
+    "title": "Scraping - Are You Sure?",
+    "body": "Scraping will clear all unsaved articles. Make sure you have saved the articles you want to save!",
+    "buttonActionText": "Scrape"
+  },
+  "clearModalData": {
+    "title": "Delete Everything - Are You Sure?",
+    "body": "If you click delete, you will delete every article, saved and unsaved!",
+    "buttonActionText": "Delete Everything"
+  }
+}

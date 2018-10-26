@@ -3,6 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const path = require('path');
+const morgan = require('morgan');
+const winston = require('./config/winston');
 
 //require authentication packages
 const passport = require('passport');
@@ -20,6 +22,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(morgan('combined', { stream: winston.stream }));
 
 //this should be below the static file middleware
 app.use(
@@ -49,7 +52,7 @@ if (process.env.NODE_ENV === 'production') {
 const mongoDBURI = process.env.MONGODB_URI || 'mongodb://localhost/nyt-react-scraper';
 mongoose.connect(mongoDBURI, { useNewUrlParser: true })
   .then(() => {
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}, Mongoose connected to MongoDB`));
+    app.listen(PORT, () => winston.log({ level: 'info', message: `Server running on port ${PORT}, Mongoose connected to MongoDB` }));
   })
-  .catch(err => console.log(err));
+  .catch(err => winston.log({ level: 'error', message: err.toString(), timestamp: Date.now }));
 

@@ -9,7 +9,7 @@ const TopNav = props => (
         <NavLink tag={Link} to="/home">Home</NavLink>
       </NavItem>
       <NavItem>
-        <NavLink tag={Link} to="/articles">Articles</NavLink>
+        <NavLink tag={Link} to="/articles">Saved Articles</NavLink>
       </NavItem>
       <NavItem>
         <NavLink href="#" onClick={props.handleScrape}>Scrape</NavLink>

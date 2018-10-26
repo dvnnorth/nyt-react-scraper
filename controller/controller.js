@@ -2,9 +2,11 @@ const db = require('../models/index');
 const bcrypt = require('bcrypt');
 const cheerio = require('cheerio');
 const request = require('request-promise');
+const winston = require('../config/winston');
 
 const sendError = (err, res) => {
   if (err) {
+    winston.log({ level: 0, message: err.toString() });
     res.statusCode = 500;
     res.send(err);
   }
@@ -20,19 +22,29 @@ module.exports = {
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(password, salt);
 
-    // Create entry in Users table
-    const newUser = db.Users({
-      username: req.body.username,
-      password: hash
-    });
-
-    newUser.save()
+    db.Users.findOne({ username: req.body.username })
       .then(user => {
-        req.login(user, err => {
-          if (err) throw err;
-          res.statusCode = 200;
-          res.send(user._id);
-        });
+        if (user === null) {
+          // Create entry in Users table
+          const newUser = db.Users({
+            username: req.body.username,
+            password: hash
+          });
+          // Save the user
+          newUser.save()
+            .then(user => {
+              req.login(user, err => {
+                if (err) throw err;
+                res.statusCode = 200;
+                res.send(user._id);
+              });
+            })
+            .catch(err => sendError(err, res));
+        }
+        else {
+          res.statusCode = 409;
+          res.send('Error: User already exists');
+        }
       })
       .catch(err => sendError(err, res));
   },
@@ -82,9 +94,15 @@ module.exports = {
       user: req.user._id
     })
       .then(() => {
+
+        // Do a query here to get every title of every saved article. Then, in the promise,
+        // do all of the below, but for every article that has a title that matches something in saved,
+        // don't add it to the articles array to be bulk added
+
         // Get the html from nytimes
         request.get('https://www.nytimes.com')
           .then(html => {
+
             // Load $ cheerio handler
             const $ = cheerio.load(html);
 
@@ -92,7 +110,7 @@ module.exports = {
             // inserted into the database
             let articles = [];
 
-            $('article').each(function () {
+            $('article').each(() => {
 
               // Save an empty result object
               let result = {};
@@ -132,7 +150,9 @@ module.exports = {
             })
               .then(() => {
                 // Get every article
-                db.Articles.find({})
+                db.Articles.find({
+                  user: req.user._id
+                })
                   .then(articles => {
                     // Send the articles
                     res.statusCode = 200;
@@ -142,6 +162,29 @@ module.exports = {
               })
               .catch(err => sendError(err, res)); // Send error if caught
           });
+      })
+      .catch(err => sendError(err, res));
+  },
+
+  articles: (req, res) => {
+    db.Articles.find({
+      user: req.user._id
+    })
+      .then(articles => {
+        res.statusCode = 200;
+        res.send(articles);
+      })
+      .catch(err => sendError(err, res));
+  },
+
+  saved: (req, res) => {
+    db.Articles.find({
+      user: req.user._id,
+      saved: true
+    })
+      .then(articles => {
+        res.statusCode = 200;
+        res.send(articles);
       })
       .catch(err => sendError(err, res));
   },
@@ -190,8 +233,8 @@ module.exports = {
   },
 
   logger: (req, res) => {
-    log(req.body.level, req.body.message);
-    res.sendStatus(500);
+    winston.log(req.body.level, req.body.message);
+    res.sendStatus(204);
   },
 
   articleSave: (req, res) => {

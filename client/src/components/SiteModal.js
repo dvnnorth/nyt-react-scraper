@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
 const SiteModal = props => (
@@ -9,8 +9,8 @@ const SiteModal = props => (
         {props.body}
       </ModalBody>
       <ModalFooter>
-        <Button color="primary" onClick={props.toggle}>{props.buttonActionText}</Button>{' '}
-        <Button color="secondary" onClick={props.toggle}>{props.buttonCancelText}</Button>
+        <Button color="primary" onClick={event => { props.buttonAction(event); props.toggle(); }}>{props.buttonActionText}</Button>{' '}
+        <Button color="secondary" onClick={props.toggle}>Cancel</Button>
       </ModalFooter>
     </Modal>
   </div>

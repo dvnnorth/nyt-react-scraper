@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const controller = require('../controller/controller.js');
+const winston = require('../config/winston');
 
 // Create the authenticationMiddleware function to validate requests
 const authenticationMiddleware = () => {
@@ -16,7 +17,7 @@ const authenticationMiddleware = () => {
   };
 };
 
-module.exports = (app, log) => {
+module.exports = app => {
 
   ////////////////////////// Auth ///////////////////////////////////////
   //local strategy used for signing in users
@@ -72,7 +73,14 @@ module.exports = (app, log) => {
   app.get('/api/user', controller.user);
   ////////////////////////// End Auth ///////////////////////////////////////
 
+  // Scrape articles (clear all unsaved and grab new ones from NYT)
   app.get('/api/scrape', authenticationMiddleware(), controller.scrape);
+
+  // Get all articles for a user
+  app.get('/api/articles', authenticationMiddleware(), controller.articles);
+
+  // Get all saved articles for a user
+  app.get('/api/saved', authenticationMiddleware(), controller.saved);
 
   // Get article with note
   app.get('/api/articles/notes/:id', authenticationMiddleware(), controller.articlesWithNote);
@@ -94,8 +102,9 @@ module.exports = (app, log) => {
 };
 
 // sendError is a simple error handling function to DRY up code
-let sendError = (err, res) => {
+const sendError = (err, res) => {
   if (err) {
+    winston.log({ level: 'error', message: err.toString() });
     res.statusCode = 500;
     res.send(err);
   }

@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
-import { Row, Container } from 'reactstrap';
+import React from 'react';
+import { Redirect, Link } from 'react-router-dom';
+import { Col, Row, Container } from 'reactstrap';
 import { PageTitle, ArticleCard } from '../components';
 
 const Home = props => {
@@ -11,8 +11,25 @@ const Home = props => {
     <Container>
       <PageTitle pageTitle="Home" />
       <Row>
-        {props.articles.map((article, i) => {
-          return (
+        {props.articles.length === 0 ?
+          (<Container>
+            <Row>
+              <Col xs="3" />
+              <Col xs="6">
+                <h3 className="text-center font-italic">No Scraped Articles!</h3>
+                <br />
+                <div>
+                  <p className="text-center">
+                    Click&nbsp;
+                    <Link className="btn-link" to="" onClick={props.handleScrape}>scrape</Link>
+                    &nbsp;to get some new articles.
+                  </p>
+                </div>
+              </Col>
+              <Col xs="3" />
+            </Row>
+          </Container>) :
+          props.articles.map((article, i) => (
             <ArticleCard
               key={i}
               _id={article._id}
@@ -20,14 +37,13 @@ const Home = props => {
               section={article.section}
               link={article.link}
               note={article.note}
-              saved={article.saved} 
+              saved={article.saved}
             />
-          );
-        })}
+          ))}
       </Row>
     </Container>
   );
-}
+};
 
 
 export default Home;
