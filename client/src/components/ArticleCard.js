@@ -15,17 +15,18 @@ const ArticleCard = props => (
             <Button
               color="primary"
               className="btn btn-outline-primary mt-3 mb-3 note"
-              onClick={props.viewEditNote}
+              onClick={props.toggleNoteModal}
               data-id={props._id}>
               View / Edit Note
             </Button> :
             <Button
               color="secondary"
               className="btn btn-outline-secondary mt-3 mb-3 note"
-              onClick={props.createNote}
+              onClick={props.toggleNoteModal}
               data-id={props._id}>
               Create Note
             </Button>}
+          &nbsp;&nbsp;
           {props.saved ?
             <Button
               color="danger"
@@ -52,7 +53,7 @@ ArticleCard.propTypes = {
   link: PropTypes.string,
   title: PropTypes.string,
   note: PropTypes.string,
-  viewEditNote: PropTypes.func,
+  toggleNoteModal: PropTypes.func,
   _id: PropTypes.string,
   createNote: PropTypes.func,
   saved: PropTypes.bool,

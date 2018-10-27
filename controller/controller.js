@@ -205,7 +205,7 @@ module.exports = {
       _id: req.params.id,
       user: req.user._id
     })
-      // ..and populate all of the notes associated with it
+      // ..and populate note associated with it
       .populate('note')
       .then(article => {
         // If we were able to successfully find an Article with the

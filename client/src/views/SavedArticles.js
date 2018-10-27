@@ -39,6 +39,7 @@ const SavedArticles = props => {
               saved={article.saved}
               saveArticle={props.saveArticle}
               unsaveArticle={props.unsaveArticle}
+              toggleNoteModal={props.toggleNoteModal}
             />
           ))}
       </Row>
@@ -50,7 +51,8 @@ SavedArticles.propTypes = {
   authenticated: PropTypes.bool,
   articles: PropTypes.array,
   saveArticle: PropTypes.func,
-  unsaveArticle: PropTypes.func
+  unsaveArticle: PropTypes.func,
+  toggleNoteModal: PropTypes.func
 };
 
 export default SavedArticles;

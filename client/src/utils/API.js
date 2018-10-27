@@ -26,6 +26,14 @@ export default {
 
   ///// End Articles /////
 
+  /////   Notes   /////
+
+  getArticleWithNote: articleId => axios.get(`/api/articles/notes/${articleId}`),
+
+  addUpdateNote: (articleId, noteData) => axios.post(`/api/articles/notes/${articleId}`, noteData),
+
+  ///// End Notes /////
+
   /////   Log   /////
 
   log: log => axios.post('/api/log', log)

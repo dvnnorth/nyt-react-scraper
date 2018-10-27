@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { Home, SavedArticles, Login, NoMatch } from './views/index';
 import './App.css';
-import { Container, Jumbotron, Button } from 'reactstrap';
+import { Container, Jumbotron } from 'reactstrap';
 import { TopNav, SiteModal } from './components';
 import API from './utils/API';
 import modaldata from './data/modalData.json';
@@ -14,6 +14,11 @@ class App extends Component {
     user: {},
     modal: false,
     modalContents: {},
+    noteModal: false,
+    noteModalTitle: '',
+    noteTitle: '',
+    noteBody: '',
+    noteArticleId: '',
     articles: [],
     savedArticles: []
   };
@@ -26,6 +31,48 @@ class App extends Component {
     this.setState({
       modalContents: { ...modalContents }
     }, this.setState({ modal: !this.state.modal }));
+  };
+
+  activateNoteModal = event => {
+    event.preventDefault();
+    let id = event.target.dataset.id;
+    API.getArticleWithNote(id)
+      .then(response => {
+        const newState = {};
+        newState.noteModalTitle = response.data.title;
+        newState.noteModal = true;
+        newState.noteArticleId = id;
+        if (response.data.note) {
+          newState.noteTitle = response.data.note.title;
+          newState.noteBody = response.data.note.body;
+        }
+        else {
+          newState.noteTitle = '';
+          newState.noteBody = '';
+        }
+        this.setState({ ...newState });
+      })
+      .catch(err => API.log({ level: 'error', message: err.toString() }));
+  };
+
+  closeNoteModal = event => {
+    event.preventDefault();
+    this.setState({ noteModal: false });
+  };
+
+  handleUpdateForm = event => this.setState({ [event.target.id]: event.target.value });
+
+  handleSaveNote = event => {
+    event.preventDefault();
+    const noteData = {
+      title: this.state.noteTitle,
+      body: this.state.noteBody
+    };
+    API.addUpdateNote(event.target.dataset.id, noteData)
+      .then(() => {
+        this.setState({ noteModal: false }, () => this.handleGetArticles());
+      })
+      .catch(err => API.log({ level: 'error', message: err.toString() }));
   };
 
   handleScrapeArticles = event => {
@@ -48,8 +95,7 @@ class App extends Component {
                 this.setState({ savedArticles: [...response.data], ...newState });
               })
               .catch(err => API.log({ level: 'error', message: err.toString() }));
-          })
-          .catch(err => API.log({ level: 'error', message: err.toString() }));
+          });
       })
       .catch(err => API.log({ level: 'error', message: err.toString() }));
   };
@@ -92,15 +138,47 @@ class App extends Component {
             <main className="row mb-2">
               {/* Insert switch here to render views */}
               <Switch>
-                <Route path="/" exact component={() => <Login authenticated={this.state.authenticated} handleAuthenticated={this.handleAuthenticated} />} />
-                <Route path="/home" component={() => <Home authenticated={this.state.authenticated} handleScrape={() => this.toggleModal(modaldata.scrapeModalData)} articles={this.state.articles} saveArticle={this.handleSaveArticle} unsaveArticle={this.handleUnsaveArticle} />} />
-                <Route path="/articles" component={() => <SavedArticles authenticated={this.state.authenticated} articles={this.state.savedArticles} saveArticle={this.handleSaveArticle} unsaveArticle={this.handleUnsaveArticle} />} />
+                <Route
+                  path="/"
+                  exact
+                  component={
+                    () => <Login
+                      authenticated={this.state.authenticated}
+                      handleAuthenticated={this.handleAuthenticated}
+                    />
+                  }
+                />
+                <Route
+                  path="/home"
+                  component={
+                    () => <Home
+                      authenticated={this.state.authenticated}
+                      handleScrape={() => this.toggleModal(modaldata.scrapeModalData)}
+                      articles={this.state.articles}
+                      saveArticle={this.handleSaveArticle}
+                      unsaveArticle={this.handleUnsaveArticle}
+                      toggleNoteModal={this.activateNoteModal}
+                    />
+                  }
+                />
+                <Route
+                  path="/articles"
+                  component={
+                    () => <SavedArticles
+                      authenticated={this.state.authenticated}
+                      articles={this.state.savedArticles}
+                      saveArticle={this.handleSaveArticle}
+                      unsaveArticle={this.handleUnsaveArticle}
+                      toggleNoteModal={this.activateNoteModal}
+                    />
+                  }
+                />
                 <Route component={NoMatch} />
               </Switch>
             </main>
           </Container>
         </Router>
-        <Button onClick={this.toggleModal}>Modal</Button>
+        {/* Scrape and Clear modal */}
         <SiteModal
           isOpen={this.state.modal}
           toggle={this.toggleModal}
@@ -111,6 +189,20 @@ class App extends Component {
             this.state.modalContents.buttonActionText === 'Scrape' ?
               this.handleScrapeArticles : this.handleClearArticles
           }
+          isNote={false}
+        />
+        {/* Create and edit note modal */}
+        <SiteModal
+          isOpen={this.state.noteModal}
+          toggle={this.closeNoteModal}
+          title={this.state.noteModalTitle}
+          noteTitle={this.state.noteTitle}
+          body={this.state.noteBody}
+          buttonActionText={'Save Note'}
+          buttonAction={this.handleSaveNote}
+          isNote={true}
+          updateForm={this.handleUpdateForm}
+          noteArticleId={this.state.noteArticleId}
         />
       </React.Fragment>
     );

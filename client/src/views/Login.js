@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, FormGroup, Label, Input } from 'reactstrap';
 import { PageTitle } from '../components';
@@ -15,7 +16,7 @@ class Login extends Component {
       const { username, password } = this.state;
       const login = { username, password };
       API.login(login)
-        .then(res => {
+        .then(() => {
           this.setState({ errorMessage: [] }, this.props.handleAuthenticated);
         })
         .catch(err => this.setState({ errorMessage: [err.toString(), 'Invalid User Name or Password'] }));
@@ -30,7 +31,7 @@ class Login extends Component {
       const { username, password } = this.state;
       const registration = { username, password };
       API.register(registration)
-        .then(res => {
+        .then(() => {
           this.authenticate();
         })
         .catch(err => {
@@ -63,7 +64,7 @@ class Login extends Component {
     }
     return (
       <Container>
-        <PageTitle pageTitle={this.state.register ? "Register" : "Login"} />
+        <PageTitle pageTitle={this.state.register ? 'Register' : 'Login'} />
 
         {/* Login Form */}
         <Row>
@@ -80,8 +81,8 @@ class Login extends Component {
               </FormGroup>
             </Form>
             <br />
-            <Button onClick={this.state.register ? this.register : this.authenticate}>Submit</Button>&nbsp;&nbsp;
-            <Button onClick={this.toggleRegister}>{this.state.register ? 'Login' : 'Register'}</Button>
+            <Button color="primary" onClick={this.state.register ? this.register : this.authenticate}>Submit</Button>&nbsp;&nbsp;
+            <Button color="secondary" onClick={this.toggleRegister}>{this.state.register ? 'Login' : 'Register'}</Button>
             {
               this.state.errorMessage &&
               (
@@ -98,5 +99,10 @@ class Login extends Component {
     );
   };
 }
+
+Login.propTypes = {
+  handleAuthenticated: PropTypes.func,
+  authenticated: PropTypes.bool
+};
 
 export default Login;

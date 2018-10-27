@@ -41,6 +41,7 @@ const Home = props => {
               saved={article.saved}
               saveArticle={props.saveArticle}
               unsaveArticle={props.unsaveArticle}
+              toggleNoteModal={props.toggleNoteModal}
             />
           ))}
       </Row>
@@ -53,7 +54,8 @@ Home.propTypes = {
   articles: PropTypes.array,
   handleScrape: PropTypes.func,
   saveArticle: PropTypes.func,
-  unsaveArticle: PropTypes.func
+  unsaveArticle: PropTypes.func,
+  toggleNoteModal: PropTypes.func
 };
 
 export default Home;
