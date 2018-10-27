@@ -1,4 +1,5 @@
-import React, { Component, Fragment } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Nav, NavItem, NavLink } from 'reactstrap';
 
@@ -20,5 +21,10 @@ const TopNav = props => (
     </Nav>
   </div>
 );
+
+TopNav.propTypes = {
+  handleScrape: PropTypes.func,
+  handleClear: PropTypes.func
+};
 
 export default TopNav;

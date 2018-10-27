@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Redirect, Link } from 'react-router-dom';
 import { Col, Row, Container } from 'reactstrap';
 import { PageTitle, ArticleCard } from '../components';
@@ -38,6 +39,8 @@ const Home = props => {
               link={article.link}
               note={article.note}
               saved={article.saved}
+              saveArticle={props.saveArticle}
+              unsaveArticle={props.unsaveArticle}
             />
           ))}
       </Row>
@@ -45,5 +48,12 @@ const Home = props => {
   );
 };
 
+Home.propTypes = {
+  authenticated: PropTypes.bool,
+  articles: PropTypes.array,
+  handleScrape: PropTypes.func,
+  saveArticle: PropTypes.func,
+  unsaveArticle: PropTypes.func
+};
 
 export default Home;

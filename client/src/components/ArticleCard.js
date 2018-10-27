@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Col, Card, CardBody, Button } from 'reactstrap';
 
 const ArticleCard = props => (
@@ -12,7 +13,7 @@ const ArticleCard = props => (
         <div>
           {props.note ?
             <Button
-              color="primary" 
+              color="primary"
               className="btn btn-outline-primary mt-3 mb-3 note"
               onClick={props.viewEditNote}
               data-id={props._id}>
@@ -25,8 +26,15 @@ const ArticleCard = props => (
               data-id={props._id}>
               Create Note
             </Button>}
-          {props.saved ||
+          {props.saved ?
             <Button
+              color="danger"
+              className="btn btn-outline-danger mt-3 mb-3 save"
+              onClick={props.unsaveArticle}
+              data-id={props._id}>
+              Unsave Article
+            </Button>
+            : <Button
               color="success"
               className="btn btn-outline-success mt-3 mb-3 save"
               onClick={props.saveArticle}
@@ -38,5 +46,18 @@ const ArticleCard = props => (
     </Card>
   </Col>
 );
+
+ArticleCard.propTypes = {
+  section: PropTypes.string,
+  link: PropTypes.string,
+  title: PropTypes.string,
+  note: PropTypes.string,
+  viewEditNote: PropTypes.func,
+  _id: PropTypes.string,
+  createNote: PropTypes.func,
+  saved: PropTypes.bool,
+  saveArticle: PropTypes.func,
+  unsaveArticle: PropTypes.func
+};
 
 export default ArticleCard;

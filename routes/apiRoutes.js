@@ -47,7 +47,7 @@ module.exports = app => {
             }
           });
         })
-        .catch(err => sendError(err, res));
+        .catch(err => winston.log({ level: 'error', message: err.toString() }));
     })
   );
 
@@ -99,13 +99,4 @@ module.exports = app => {
 
   // Delete all articles
   app.delete('/api/clear', authenticationMiddleware(), controller.deleteAllArticles);
-};
-
-// sendError is a simple error handling function to DRY up code
-const sendError = (err, res) => {
-  if (err) {
-    winston.log({ level: 'error', message: err.toString() });
-    res.statusCode = 500;
-    res.send(err);
-  }
 };

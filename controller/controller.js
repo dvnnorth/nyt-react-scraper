@@ -99,69 +99,80 @@ module.exports = {
         // do all of the below, but for every article that has a title that matches something in saved,
         // don't add it to the articles array to be bulk added
 
-        // Get the html from nytimes
-        request.get('https://www.nytimes.com')
-          .then(html => {
+        db.Articles.find({
+          saved: true,
+          user: req.user._id
+        })
+          .then(savedArticles => {
 
-            // Load $ cheerio handler
-            const $ = cheerio.load(html);
+            const savedTitles = savedArticles.map(article => article.title);
 
-            // articles will hold all of the article objects to be
-            // inserted into the database
-            let articles = [];
+            // Get the html from nytimes
+            request.get('https://www.nytimes.com')
+              .then(html => {
 
-            $('article').each(() => {
+                // Load $ cheerio handler
+                const $ = cheerio.load(html);
 
-              // Save an empty result object
-              let result = {};
+                // articles will hold all of the article objects to be
+                // inserted into the database
+                let articles = [];
 
-              // Get the section to exclude the Breifings
-              let section = $(this).closest($('section'))
-                .attr('data-block-tracking-id');
+                $('article').each((i, element) => {
 
-              if (section !== 'Briefings') {
+                  // Save an empty result object
+                  let result = {};
 
-                // Add the text and href of every link, and
-                // save them as properties of the result object
-                result.title = $(this)
-                  .find('h2')
-                  .text();
-                // Store the section for display later
-                result.section = section;
-                // Store the link to the article
-                result.link = `https://www.nytimes.com${$(this)
-                  .find('a')
-                  .attr('href')}`;
-                // Store a null note for now
-                result.note = null;
-                result.user = req.user._id;
-              }
+                  // Get the section to exclude the Breifings
+                  let section = $(element).closest($('section'))
+                    .attr('data-block-tracking-id');
 
-              // Only push the article to results if the required
-              // fields exist
-              if (result.title && result.section && result.link) {
-                articles.push(result);
-              }
-            });
+                  if (section !== 'Briefings') {
 
-            // Bulk insert all of the article objects
-            db.Articles.insertMany(articles, {
-              ordered: false
-            })
-              .then(() => {
-                // Get every article
-                db.Articles.find({
-                  user: req.user._id
+                    // Add the text and href of every link, and
+                    // save them as properties of the result object
+                    result.title = $(element)
+                      .find('h2')
+                      .text();
+                    // Store the section for display later
+                    result.section = section;
+                    // Store the link to the article
+                    result.link = `https://www.nytimes.com${$(element)
+                      .find('a')
+                      .attr('href')}`;
+                    // Store a null note for now
+                    result.note = null;
+                    result.user = req.user._id;
+                  }
+
+                  // Only push the article to results if the required
+                  // fields exist and it isn't already saved
+                  if (result.title && result.section && result.link && !savedTitles.includes(result.title)) {
+                    articles.push(result);
+                  }
+                });
+
+                // Bulk insert all of the article objects
+                db.Articles.insertMany(articles, {
+                  ordered: false
                 })
-                  .then(articles => {
-                    // Send the articles
-                    res.statusCode = 200;
-                    res.send(articles);
+                  .then(() => {
+                    // Get every article
+                    db.Articles.find({
+                      user: req.user._id
+                    })
+                      .then(articles => {
+                        // Send the articles
+                        res.statusCode = 200;
+                        res.send(articles);
+                      })
+                      .catch(err => sendError(err, res)); // Send error if caught
                   })
                   .catch(err => sendError(err, res)); // Send error if caught
-              })
-              .catch(err => sendError(err, res)); // Send error if caught
-          });
+              });
+
+          })
+          .catch(err => sendError(err, res));
       })
       .catch(err => sendError(err, res));
   },
@@ -261,6 +272,7 @@ module.exports = {
         article.saved = false;
         article.save(() => {
           res.sendStatus(200);
+          res.send(article);
         });
       })
       .catch(err => sendError(err, res));

@@ -9,34 +9,16 @@ import modaldata from './data/modalData.json';
 
 class App extends Component {
 
-  constructor(props) {
-    super(props);
+  state = {
+    authenticated: false,
+    user: {},
+    modal: false,
+    modalContents: {},
+    articles: [],
+    savedArticles: []
+  };
 
-    this.state = {
-      authenticated: false,
-      user: {},
-      modal: false,
-      modalContents: {},
-      articles: [],
-      savedArticles: []
-    };
-
-    // Populate articles and saved articles with data from database
-    API.articles()
-      .then(response => {
-        this.setState({ articles: [...response.data] },
-          () => {
-            API.savedArticles()
-              .then(response => {
-                this.setState({ savedArticles: [...response.data] });
-              })
-              .catch(err => API.log({ level: 'error', message: err.toString() }));
-          });
-      })
-      .catch(err => API.log({ level: 'error', message: err.toString() }));
-  }
-
-  handleAuthenticated = () => this.setState({ authenticated: true });
+  handleAuthenticated = () => this.handleGetArticles({ authenticated: true });
 
   handleLogOut = () => this.setState({ authenticated: false });
 
@@ -55,10 +37,41 @@ class App extends Component {
       .catch(err => API.log({ level: 'error', message: err.toString() }));
   };
 
+  handleGetArticles = newState => {
+    // Populate articles and saved articles with data from database
+    API.articles()
+      .then(response => {
+        this.setState({ articles: [...response.data] },
+          () => {
+            API.savedArticles()
+              .then(response => {
+                this.setState({ savedArticles: [...response.data], ...newState });
+              })
+              .catch(err => API.log({ level: 'error', message: err.toString() }));
+          })
+          .catch(err => API.log({ level: 'error', message: err.toString() }));
+      })
+      .catch(err => API.log({ level: 'error', message: err.toString() }));
+  };
+
+  handleSaveArticle = event => {
+    event.preventDefault();
+    API.saveArticle(event.target.dataset.id)
+      .then(() => this.handleGetArticles())
+      .catch(err => API.log({ level: 'error', message: err.toString() }));
+  };
+
+  handleUnsaveArticle = event => {
+    event.preventDefault();
+    API.unsaveArticle(event.target.dataset.id)
+      .then(() => this.handleGetArticles())
+      .catch(err => API.log({ level: 'error', message: err.toString() }));
+  };
+
   handleClearArticles = event => {
     event.preventDefault();
     API.clearArticles()
-      .then(_ => {
+      .then(() => {
         this.setState({ articles: [] });
       })
       .catch(err => API.log({ level: 'error', message: err.toString() }));
@@ -80,8 +93,8 @@ class App extends Component {
               {/* Insert switch here to render views */}
               <Switch>
                 <Route path="/" exact component={() => <Login authenticated={this.state.authenticated} handleAuthenticated={this.handleAuthenticated} />} />
-                <Route path="/home" component={() => <Home authenticated={this.state.authenticated} handleScrape={() => this.toggleModal(modaldata.scrapeModalData)} articles={this.state.articles} />} />
-                <Route path="/articles" component={() => <SavedArticles authenticated={this.state.authenticated} articles={this.state.savedArticles} />} />
+                <Route path="/home" component={() => <Home authenticated={this.state.authenticated} handleScrape={() => this.toggleModal(modaldata.scrapeModalData)} articles={this.state.articles} saveArticle={this.handleSaveArticle} unsaveArticle={this.handleUnsaveArticle} />} />
+                <Route path="/articles" component={() => <SavedArticles authenticated={this.state.authenticated} articles={this.state.savedArticles} saveArticle={this.handleSaveArticle} unsaveArticle={this.handleUnsaveArticle} />} />
                 <Route component={NoMatch} />
               </Switch>
             </main>

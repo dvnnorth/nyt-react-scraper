@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export default {
-  
+
   /////   Auth   //////
 
   login: loginInfo => axios.post('/api/login', loginInfo),
@@ -20,12 +20,16 @@ export default {
 
   articles: () => axios.get('/api/articles'),
 
+  saveArticle: articleId => axios.put(`/api/save/${articleId}`),
+
+  unsaveArticle: articleId => axios.delete(`/api/save/${articleId}`),
+
   ///// End Articles /////
 
   /////   Log   /////
 
   log: log => axios.post('/api/log', log)
-  
+
   ///// End Log /////
 
 };
