@@ -29,8 +29,11 @@ class Login extends Component {
   register = () => {
     if (this.state.username && this.state.password) {
       if (this.state.password === this.state.passwordVerify) {
-        const validationRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-        if (validationRegex.test(this.state.password)) {
+        // We actually want the password to fail this regex text
+        // DeMorgan's Law, simpler logic, discovered at the following StackOverflow
+        // https://stackoverflow.com/questions/19605150/regex-for-password-must-contain-at-least-eight-characters-at-least-one-number-a
+        const antiValidationRegex = /^(.{0,7}|[^0-9]*|[^A-Z]*|[^a-z]*)$/;
+        if (!antiValidationRegex.test(this.state.password)) {
           const { username, password } = this.state;
           const registration = { username, password };
           API.register(registration)
