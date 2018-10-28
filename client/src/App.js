@@ -60,13 +60,11 @@ class App extends Component {
     this.setState({ noteModal: false });
   };
 
-  handleUpdateForm = event => this.setState({ [event.target.id]: event.target.value });
-
-  handleSaveNote = event => {
+  handleSaveNote = (event, passedState) => {
     event.preventDefault();
     const noteData = {
-      title: this.state.noteTitle,
-      body: this.state.noteBody
+      title: passedState.noteTitle,
+      body: passedState.noteBody
     };
     API.addUpdateNote(event.target.dataset.id, noteData)
       .then(() => {
@@ -201,7 +199,6 @@ class App extends Component {
           buttonActionText={'Save Note'}
           buttonAction={this.handleSaveNote}
           isNote={true}
-          updateForm={this.handleUpdateForm}
           noteArticleId={this.state.noteArticleId}
         />
       </React.Fragment>
