@@ -8,7 +8,7 @@ const ArticleCard = props => (
       <CardBody className="d-flex flex-column align-items-start">
         <strong className="d-inline-block mb-2 text-primary">{props.section}</strong>
         <h3 className="card-header">
-          <a className="text-dark" href={props.link}>{props.title}</a>
+          <a className="text-dark" href={props.link} target="_blank">{props.title}</a>
         </h3>
         <div>
           {props.note ?
