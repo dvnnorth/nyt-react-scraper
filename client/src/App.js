@@ -116,7 +116,7 @@ class App extends Component {
     event.preventDefault();
     API.clearArticles()
       .then(() => {
-        this.setState({ articles: [] });
+        this.setState({ articles: [], savedArticles: [] });
       })
       .catch(err => API.log({ level: 'error', message: err.toString() }));
   };
